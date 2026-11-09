@@ -1,4 +1,4 @@
-def deposit(amount: float, currency: str, user_id: str, transaction_id: str):
+def deposit(accountid: int, amount: float, currency: str, user_id: str, transaction_id: str):
     # Validating input parameters
     if amount <= 0:
         return {"status": "error", "message": "Deposit amount must be greater than zero."}
