@@ -1,11 +1,10 @@
 def transfer_funds(senderid, recipientid, amount):
     if amount <= 0:
-        return "Transfer amount must be greater than zero."
+        return False  # transfer failed due to invalid amount
+    if senderid["balance"] < amount:
+        return False  # transfer failed due to insufficient funds
+
+    senderid["balance"] -= amount
+    recipientid["balance"] += amount
     
-    if senderid.balance < amount:
-        return "Insufficient funds in sender's account."
-    
-    senderid.balance -= amount
-    recipientid.balance += amount
-    
-    return ("Successfully transferred " + str(amount) + " from " + senderid.name + " to " + recipientid.name + ".")
+    return True  # transfer successful
