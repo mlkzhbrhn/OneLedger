@@ -1,10 +1,12 @@
-def transfer_funds(senderid, recipientid, amount):
+def transfer_funds(senderid, recipientid, amount, currency):
     if amount <= 0:
         return False  # transfer failed due to invalid amount
-    if senderid["balance"] < amount:
+    if currency not in senderid["balances"]:
+        return False  # transfer failed due to invalid currency
+    if senderid["balances"][currency] < amount:
         return False  # transfer failed due to insufficient funds
 
-    senderid["balance"] -= amount
-    recipientid["balance"] += amount
-    
+    senderid["balances"][currency] -= amount
+    recipientid["balances"][currency] += amount
+
     return True  # transfer successful
