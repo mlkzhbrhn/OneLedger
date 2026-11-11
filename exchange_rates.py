@@ -8,7 +8,9 @@ def get_crypto_exchange_rates():
         "SOL": response.get("solana", {}).get("usd", 0)
     }
 def get_fiat_exchange_rates(base_currency):
-    response = requests.get(f"https://v6.exchangerate-api.com/v6/a2b3d026b739a6875092edf5/latest/{base_currency}").json()
+    import config
+    EXCHANGE_RATE_API_KEY = config.EXCHANGE_RATE_API_KEY
+    response = requests.get(f"https://v6.exchangerate-api.com/v6/{EXCHANGE_RATE_API_KEY}/latest/{base_currency}").json()
     return (
         response.get("conversion_rates")
     )

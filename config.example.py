@@ -1,0 +1,1 @@
+EXCHANGE_RATE_API_KEY = "your_api_key_here"  # Replace with your actual API key for the exchange rate service
