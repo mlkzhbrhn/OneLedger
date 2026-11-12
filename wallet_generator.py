@@ -17,5 +17,3 @@ def generate_seed_phrase():
 
 seed = generate_seed_phrase()
 address = generate_wallet(seed)
-
-print("seed:", seed, "\naddress:", address)
