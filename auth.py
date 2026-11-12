@@ -17,6 +17,7 @@ def register_user(username, password, role):
         return False
     seed = wallet_generator.generate_seed_phrase()
 
+    # create user record with base values
     db[username] = {
     "role": role,
     "password": hash_password(password),
