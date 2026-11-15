@@ -15,5 +15,3 @@ def generate_seed_phrase():
         
     return seed_phrase.strip()
 
-seed = generate_seed_phrase()
-address = generate_wallet(seed)
