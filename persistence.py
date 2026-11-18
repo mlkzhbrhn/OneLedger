@@ -1,6 +1,7 @@
 import json # importing json since python dictionaries are same as json objects, so we can use json to read and write to the db.json file
+import config
 
-db_file = "db.json" # path to the database file
+db_file = config.DB_FILE # path to the database file
 
 # function to load the database from the db.json file
 def load_db():
