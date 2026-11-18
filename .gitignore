@@ -7,3 +7,5 @@ env/
 .env
 *.env
 .vscode/
+config.py
+db.json

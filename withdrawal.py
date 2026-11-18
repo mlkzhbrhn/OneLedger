@@ -1,12 +1,30 @@
+import datetime
+import persistence
+
 def withdrawal(accountid, amount, currency):
-    # Validate the amount
-    if amount <= 0:
-        return False  # withdrawal failed due to invalid amount
-    if accountid["balances"][currency] < amount:
-        return False  # withdrawal failed due to insufficient funds
-    if currency not in accountid["balances"]:
-        return False  # withdrawal failed due to invalid currency
+    if amount <= 0 or not currency or not isinstance(currency, str):
+        return False
 
-    accountid["balances"][currency] -= amount  # Deduct the amount from the account balance
+    currency = currency.upper()
+    db = persistence.load_db()
 
-    return True  # successful withdrawal
+    if accountid not in db:
+        return False
+
+    balances = db[accountid]["fiat"]["balances"]
+    if currency not in balances or balances[currency] < amount:
+        return False
+
+    balances[currency] -= amount
+
+    transactions = db[accountid]["fiat"]["transactions"]
+    transactions.append({
+        "id": len(transactions) + 1,
+        "type": "withdrawal",
+        "amount": amount,
+        "currency": currency,
+        "date": datetime.datetime.now().strftime("%Y-%m-%d")
+    })
+
+    persistence.save_db(db)
+    return True
