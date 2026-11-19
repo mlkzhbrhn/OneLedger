@@ -1,5 +1,6 @@
 import datetime
 import persistence
+import points
 
 def deposit(accountid, amount, currency):
     if amount <= 0 or not currency or not isinstance(currency, str):
@@ -23,5 +24,6 @@ def deposit(accountid, amount, currency):
         "date": datetime.datetime.now().strftime("%Y-%m-%d")
     })
 
+    points.reward_points(accountid, amount)
     persistence.save_db(db)
     return True

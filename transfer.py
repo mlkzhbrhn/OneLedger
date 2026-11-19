@@ -1,5 +1,6 @@
 import datetime
 import persistence
+import points
 
 def transfer_funds(senderid, recipientid, amount, currency):
     if amount <= 0 or not currency or not isinstance(currency, str):
@@ -40,5 +41,6 @@ def transfer_funds(senderid, recipientid, amount, currency):
         "date": datetime.datetime.now().strftime("%Y-%m-%d")
     })
 
+    points.reward_points(senderid, amount)
     persistence.save_db(db)
     return True
