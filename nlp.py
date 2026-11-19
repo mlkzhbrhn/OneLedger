@@ -1,5 +1,5 @@
 # corpus of words that may be used in the context of the application
-words = "buy sell transfer send deposit withdraw stake convert usdt usd pkr sol eth btc"
+words = "buy to sell transfer send deposit withdraw stake borrow lend pay back payback redeem points convert usdt usd pkr sol eth btc"
 
 # counter for all words in the corpus, which will be used to calculate the probability of a word
 def counter(words):
@@ -46,4 +46,15 @@ def edits1(word):
 # bruteforcing all types of edits that are 2 edits away from the word
 def edits2(word): 
     return (e2 for e1 in edits1(word) for e2 in edits1(e1))
- 
+
+# separating commands from text and correcting any misspelled words in the commands
+def command_parser(text):
+    words = text.lower().split()
+    commands = []
+    for i in range(len(words)):
+        word = words[i]
+        if word == "to" or word.startswith("@") or word.isdigit():
+            commands.append(word)
+        else:
+            commands.append(correction(word))
+    return commands
