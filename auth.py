@@ -11,6 +11,9 @@ def register_user(username, password, role):
     if username in db:
         return False # user already exists
 
+    if role not in ["user", "admin"]:
+        return False # invalid role
+    
     if len(username) < 3 or len(username) > 20:
         return False 
     if len(password) < 8:
