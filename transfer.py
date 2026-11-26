@@ -1,6 +1,8 @@
 import datetime
+
 import persistence
 import points
+
 
 def transfer_funds(senderid, recipientid, amount, currency):
     if amount <= 0 or not currency or not isinstance(currency, str):
@@ -24,22 +26,26 @@ def transfer_funds(senderid, recipientid, amount, currency):
     recipient_balances[currency] = recipient_balances.get(currency, 0) + amount
 
     sender_txs = db[senderid]["fiat"]["transactions"]
-    sender_txs.append({
-        "id": len(sender_txs) + 1,
-        "type": "transfer_out",
-        "amount": amount,
-        "currency": currency,
-        "date": datetime.datetime.now().strftime("%Y-%m-%d")
-    })
+    sender_txs.append(
+        {
+            "id": len(sender_txs) + 1,
+            "type": "transfer_out",
+            "amount": amount,
+            "currency": currency,
+            "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+        }
+    )
 
     recipient_txs = db[recipientid]["fiat"]["transactions"]
-    recipient_txs.append({
-        "id": len(recipient_txs) + 1,
-        "type": "transfer_in",
-        "amount": amount,
-        "currency": currency,
-        "date": datetime.datetime.now().strftime("%Y-%m-%d")
-    })
+    recipient_txs.append(
+        {
+            "id": len(recipient_txs) + 1,
+            "type": "transfer_in",
+            "amount": amount,
+            "currency": currency,
+            "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+        }
+    )
 
     points.reward_points(senderid, amount)
     persistence.save_db(db)

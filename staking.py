@@ -1,6 +1,8 @@
 # staking feature for crypto wallets
-import persistence
 import datetime
+
+import persistence
+
 
 # staking yield calculator using recursion (compound interest formula)
 def calculate_staking_yield(principal, rate, days):
@@ -8,7 +10,8 @@ def calculate_staking_yield(principal, rate, days):
         return principal
     else:
         next_day_principal = principal * (1 + rate / 100)
-        return calculate_staking_yield(next_day_principal, rate, days - 1) 
+        return calculate_staking_yield(next_day_principal, rate, days - 1)
+
 
 def stake_crypto(userid, cryptocurrency, amount):
     db = persistence.load_db()
@@ -25,12 +28,12 @@ def stake_crypto(userid, cryptocurrency, amount):
     user["wallet"]["staked_assets"][cryptocurrency] = current_staked + amount
 
     # record transaction
-    transaction ={
+    transaction = {
         "id": len(user["wallet"]["transactions"]) + 1,
         "type": "stake",
         "amount": amount,
         "asset": cryptocurrency,
-        "date": datetime.datetime.now().strftime("%Y-%m-%d")
+        "date": datetime.datetime.now().strftime("%Y-%m-%d"),
     }
     user["wallet"]["transactions"].append(transaction)
 
