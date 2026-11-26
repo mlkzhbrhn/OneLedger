@@ -4,7 +4,7 @@ import command_executor
 import crypto_transfers
 import persistence
 import staking
-from ui_helpers import asset_card, go_back
+from ui_helpers import asset_card, go_back, screen_loader
 
 
 def send_crypto_screen(page, username):
@@ -165,15 +165,25 @@ def crypto_screen(page, username):
     eth_balance = user["wallet"]["assets"]["ETH"]
     sol_balance = user["wallet"]["assets"]["SOL"]
     btc_balance = user["wallet"]["assets"]["BTC"]
-    command_field = ft.TextField(hint_text="try: send 0.5 BTC to @john", width=300)
     status_message = ft.Text("", color=ft.Colors.RED)
 
-    def crypto_screen_loader():
-        page.clean()
-        page.add(send_crypto_screen(page, username))
+    def handle_command():
+        command = command_field.value.strip()
+        if not command:
+            status_message.value = "Please enter a command"
+            return
+
+        result = command_executor.execute_command(username, command)
+        if not result:
+            status_message.value = "Transfer failed."
+        else:
+            status_message.value = "Transfer successful."
+
+    command_field = ft.TextField(
+        hint_text="try: send 0.5 BTC to @john", width=300, on_submit=handle_command
+    )
 
     return ft.Container(
-        # bgcolor=ft.Colors.GREY,
         content=ft.Column(
             [
                 ft.Row(
@@ -218,7 +228,12 @@ def crypto_screen(page, username):
                                 ),
                                 ft.Column(
                                     [
-                                        ft.Button("->", on_click=crypto_screen_loader),
+                                        ft.Button(
+                                            "->",
+                                            on_click=lambda: screen_loader(
+                                                page, send_crypto_screen, username
+                                            ),
+                                        ),
                                         ft.Text("Send"),
                                     ],
                                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,

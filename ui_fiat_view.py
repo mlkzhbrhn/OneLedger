@@ -8,7 +8,7 @@ import deposit
 import persistence
 import transfer
 import withdrawal
-from ui_helpers import asset_card, go_back
+from ui_helpers import asset_card, go_back, screen_loader
 
 
 def transfer_screen(page, username):
@@ -318,9 +318,6 @@ def dashboard(page, username):
     fiat_txs = user["fiat"]["transactions"]
     pkr_balance = user["fiat"]["balances"]["PKR"]
     usd_balance = user["fiat"]["balances"]["USD"]
-    # eth_balance = user["wallet"]["assets"]["ETH"]
-    # sol_balance = user["wallet"]["assets"]["SOL"]
-    # btc_balance = user["wallet"]["assets"]["BTC"]
 
     def handle_command():
         command = command_field.value.strip()
@@ -339,24 +336,7 @@ def dashboard(page, username):
     )
     status_message = ft.Text("", color=ft.Colors.RED)
 
-    def deposit_screen_loader():
-        page.clean()
-        page.add(deposit_screen(page, username))
-
-    def withdrawal_screen_loader():
-        page.clean()
-        page.add(withdrawal_screen(page, username))
-
-    def transfer_screen_loader():
-        page.clean()
-        page.add(transfer_screen(page, username))
-
-    def convert_screen_loader():
-        page.clean()
-        page.add(convert_screen(page, username))
-
     return ft.Container(
-        # bgcolor=ft.Colors.GREY,
         content=ft.Column(
             [
                 ft.Row(
@@ -367,21 +347,6 @@ def dashboard(page, username):
                         asset_card(
                             "USD", usd_balance, "https://flagcdn.com/w80/us.png"
                         ),
-                        # asset_card(
-                        #     "BTC",
-                        #     btc_balance,
-                        #     "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
-                        # ),
-                        # asset_card(
-                        #     "ETH",
-                        #     eth_balance,
-                        #     "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-                        # ),
-                        # asset_card(
-                        #     "SOL",
-                        #     sol_balance,
-                        #     "https://cryptologos.cc/logos/solana-sol-logo.png",
-                        # ),
                     ],
                     scroll=ft.ScrollMode.AUTO,
                 ),
@@ -400,7 +365,12 @@ def dashboard(page, username):
                             [
                                 ft.Column(
                                     [
-                                        ft.Button("+", on_click=deposit_screen_loader),
+                                        ft.Button(
+                                            "+",
+                                            on_click=lambda: screen_loader(
+                                                page, deposit_screen, username
+                                            ),
+                                        ),
                                         ft.Text("Deposit"),
                                     ],
                                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -408,7 +378,10 @@ def dashboard(page, username):
                                 ft.Column(
                                     [
                                         ft.Button(
-                                            "-", on_click=withdrawal_screen_loader
+                                            "-",
+                                            on_click=lambda: screen_loader(
+                                                page, withdrawal_screen, username
+                                            ),
                                         ),
                                         ft.Text("Withdraw"),
                                     ],
@@ -417,7 +390,10 @@ def dashboard(page, username):
                                 ft.Column(
                                     [
                                         ft.Button(
-                                            "->", on_click=transfer_screen_loader
+                                            "->",
+                                            on_click=lambda: screen_loader(
+                                                page, transfer_screen, username
+                                            ),
                                         ),
                                         ft.Text("Transfer"),
                                     ],
@@ -425,7 +401,12 @@ def dashboard(page, username):
                                 ),
                                 ft.Column(
                                     [
-                                        ft.Button("x", on_click=convert_screen_loader),
+                                        ft.Button(
+                                            "x",
+                                            on_click=lambda: screen_loader(
+                                                page, convert_screen, username
+                                            ),
+                                        ),
                                         ft.Text("Convert"),
                                     ],
                                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,

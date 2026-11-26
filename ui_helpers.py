@@ -3,7 +3,6 @@ import flet as ft
 
 def asset_card(name, balance, flag_url):
     return ft.Container(
-        # bgcolor=ft.Colors.WHITE,
         border_radius=10,
         width=150,
         margin=5,
@@ -28,3 +27,8 @@ def go_back(page, username, content=None):
     page.add(
         app_shell(page, username, content) if content else app_shell(page, username)
     )
+
+
+def screen_loader(page, screen_function, username):
+    page.clean()
+    page.add(screen_function(page, username))

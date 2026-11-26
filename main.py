@@ -89,7 +89,6 @@ def app_shell(page, username, content=dashboard):
 
     sidebar = ft.Container(
         width=160,
-        # bgcolor=ft.Colors.BLUE_GREY_900,
         padding=12,
         content=ft.Column(
             [
