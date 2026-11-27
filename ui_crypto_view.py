@@ -240,7 +240,7 @@ def crypto_screen(page, username):
                                 ),
                                 ft.Column(
                                     [
-                                        ft.Button("x", on_click=None),
+                                        ft.Button("x", on_click=lambda: screen_loader(page, stake_screen, username)),
                                         ft.Text("Stake"),
                                     ],
                                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
