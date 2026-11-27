@@ -29,7 +29,11 @@ def register_user(username, password, role):
         "password": hash_password(password),
         "points": 0,
         "loans": [],
-        "fiat": {"balances": {"PKR": 0, "USD": 0}, "transactions": []},
+        "fiat": {
+            "balances": {"PKR": 0, "USD": 0},
+            "savings": {"PKR": 0, "USD": 0},
+            "transactions": [],
+        },
         "wallet": {
             "address": wallet_generator.generate_wallet(seed),
             "assets": {"BTC": 0, "ETH": 0, "SOL": 0},
