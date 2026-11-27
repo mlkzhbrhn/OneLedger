@@ -1,7 +1,160 @@
 import flet as ft
 
 import persistence
-from ui_helpers import asset_card
+import savings
+import staking
+from ui_helpers import asset_card, go_back, screen_loader
+
+
+def staking_action_screen(page, username, mode="unstake"):
+    is_stake = mode == "stake"
+    action_label = "Stake" if is_stake else "Unstake"
+    asset_field = ft.Dropdown(
+        label="Asset",
+        options=[
+            ft.dropdown.Option("BTC"),
+            ft.dropdown.Option("ETH"),
+            ft.dropdown.Option("SOL"),
+        ],
+        width=150,
+    )
+    amount_field = ft.TextField(label="Amount", width=150)
+    status_message = ft.Text("", color=ft.Colors.RED)
+
+    def handle_submit():
+        asset = asset_field.value
+        if not asset:
+            status_message.value = "Please select an asset"
+            return
+
+        try:
+            amount = float(amount_field.value)
+        except (TypeError, ValueError):
+            status_message.value = "Please enter a valid amount"
+            return
+
+        if amount <= 0:
+            status_message.value = "Amount must be greater than zero"
+            return
+
+        if is_stake:
+            result = staking.stake_crypto(username, asset, amount)
+            fail_msg = "Staking failed. Check available wallet balance."
+        else:
+            result = staking.unstake_crypto(username, asset, amount)
+            fail_msg = "Unstaking failed. Check staked balance."
+
+        if not result:
+            status_message.value = fail_msg
+        else:
+            go_back(page, username, content=earn_screen)
+
+    return ft.Container(
+        ft.Column(
+            [
+                ft.Row(
+                    [ft.Text("Asset", width=70), asset_field],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(
+                    [ft.Text("Amount", width=70), amount_field],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row([status_message], alignment=ft.MainAxisAlignment.CENTER),
+                ft.Row(
+                    [
+                        ft.Button(action_label, on_click=handle_submit),
+                        ft.Button(
+                            "Cancel",
+                            on_click=lambda: go_back(
+                                page, username, content=earn_screen
+                            ),
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            expand=True,
+        ),
+        expand=True,
+    )
+
+
+def savings_action_screen(page, username, mode="deposit"):
+    is_deposit = mode == "deposit"
+    action_label = "Save" if is_deposit else "Withdraw"
+    currency_field = ft.Dropdown(
+        label="Currency",
+        options=[
+            ft.dropdown.Option("PKR"),
+            ft.dropdown.Option("USD"),
+        ],
+        width=150,
+    )
+    amount_field = ft.TextField(label="Amount", width=150)
+    status_message = ft.Text("", color=ft.Colors.RED)
+
+    def handle_submit():
+        currency = currency_field.value
+        if not currency:
+            status_message.value = "Please select currency"
+            return
+
+        try:
+            amount = float(amount_field.value)
+        except (TypeError, ValueError):
+            status_message.value = "Please enter a valid amount"
+            return
+
+        if amount <= 0:
+            status_message.value = "Amount must be greater than zero"
+            return
+
+        if is_deposit:
+            result = savings.deposit_to_savings(username, amount, currency)
+            fail_msg = "Failed to deposit to savings. Check your fiat balance."
+        else:
+            result = savings.withdraw_from_savings(username, amount, currency)
+            fail_msg = "Failed to withdraw from savings. Check your savings balance."
+
+        if not result:
+            status_message.value = fail_msg
+        else:
+            go_back(page, username, content=earn_screen)
+
+    return ft.Container(
+        ft.Column(
+            [
+                ft.Row(
+                    [ft.Text("Currency", width=70), currency_field],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(
+                    [ft.Text("Amount", width=70), amount_field],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row([status_message], alignment=ft.MainAxisAlignment.CENTER),
+                ft.Row(
+                    [
+                        ft.Button(action_label, on_click=handle_submit),
+                        ft.Button(
+                            "Cancel",
+                            on_click=lambda: go_back(
+                                page, username, content=earn_screen
+                            ),
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            expand=True,
+        ),
+        expand=True,
+    )
 
 
 def earn_screen(page, username):
@@ -20,7 +173,49 @@ def earn_screen(page, username):
     return ft.Container(
         content=ft.Column(
             [
-                ft.Text("Staked Crypto", size=16, weight=ft.FontWeight.BOLD),
+                ft.Row(
+                    [
+                        ft.Text("Staked Crypto", size=16, weight=ft.FontWeight.BOLD),
+                        ft.Row(
+                            [
+                                ft.Column(
+                                    [
+                                        ft.Button(
+                                            "+",
+                                            on_click=lambda: screen_loader(
+                                                page,
+                                                lambda p, u: staking_action_screen(
+                                                    p, u, mode="stake"
+                                                ),
+                                                username,
+                                            ),
+                                        ),
+                                        ft.Text("Stake"),
+                                    ],
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                ),
+                                ft.Column(
+                                    [
+                                        ft.Button(
+                                            "-",
+                                            on_click=lambda: screen_loader(
+                                                page,
+                                                lambda p, u: staking_action_screen(
+                                                    p, u, mode="unstake"
+                                                ),
+                                                username,
+                                            ),
+                                        ),
+                                        ft.Text("Unstake"),
+                                    ],
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                ),
+                            ]
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
                 ft.Row(
                     [
                         asset_card(
@@ -45,7 +240,46 @@ def earn_screen(page, username):
                 ft.Row(
                     [
                         ft.Text("Fiat Savings", size=16, weight=ft.FontWeight.BOLD),
-                        ft.Text("Coming soon", size=12, color=ft.Colors.GREY),
+                        ft.Row(
+                            [
+                                ft.Column(
+                                    [
+                                        ft.Button(
+                                            "+",
+                                            on_click=lambda: screen_loader(
+                                                page,
+                                                lambda page, username: (
+                                                    savings_action_screen(
+                                                        page, username, mode="deposit"
+                                                    )
+                                                ),
+                                                username,
+                                            ),
+                                        ),
+                                        ft.Text("Save"),
+                                    ],
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                ),
+                                ft.Column(
+                                    [
+                                        ft.Button(
+                                            "-",
+                                            on_click=lambda: screen_loader(
+                                                page,
+                                                lambda page, username: (
+                                                    savings_action_screen(
+                                                        page, username, mode="withdraw"
+                                                    )
+                                                ),
+                                                username,
+                                            ),
+                                        ),
+                                        ft.Text("Withdraw"),
+                                    ],
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                ),
+                            ]
+                        ),
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
