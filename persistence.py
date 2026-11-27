@@ -1,3 +1,4 @@
+import datetime
 import json  # importing json since python dictionaries are same as json objects, so we can use json to read and write to the db.json file
 
 import config
@@ -18,3 +19,15 @@ def save_db(db):
         json.dump(
             db, f, indent=2
         )  # saving the database to the db.json file as a json object with indentation for readability
+
+
+def record_transaction(transactions, tx_type, amount, unit_key, unit_value):
+    transactions.append(
+        {
+            "id": len(transactions) + 1,
+            "type": tx_type,
+            "amount": amount,
+            unit_key: unit_value,
+            "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+        }
+    )

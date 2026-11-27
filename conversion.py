@@ -1,6 +1,4 @@
 # conversion functionality for fiat to crypto and vice versa
-import datetime
-
 import exchange_rates
 import persistence
 
@@ -41,23 +39,11 @@ def convert_fiat_to_crypto(userid, fiat_amount, fiat_currency, crypto_currency):
     user["wallet"]["assets"][crypto_currency] = (
         user["wallet"]["assets"].get(crypto_currency, 0) + converted_amount
     )
-    user["fiat"]["transactions"].append(
-        {
-            "id": len(user["fiat"]["transactions"]) + 1,
-            "type": "sell",
-            "amount": fiat_amount,
-            "currency": fiat_currency,
-            "date": datetime.datetime.now().strftime("%Y-%m-%d"),
-        }
+    persistence.record_transaction(
+        user["fiat"]["transactions"], "sell", fiat_amount, "currency", fiat_currency
     )
-    user["wallet"]["transactions"].append(
-        {
-            "id": len(user["wallet"]["transactions"]) + 1,
-            "type": "buy",
-            "amount": converted_amount,
-            "asset": crypto_currency,
-            "date": datetime.datetime.now().strftime("%Y-%m-%d"),
-        }
+    persistence.record_transaction(
+        user["wallet"]["transactions"], "buy", converted_amount, "asset", crypto_currency
     )
     persistence.save_db(db)
 

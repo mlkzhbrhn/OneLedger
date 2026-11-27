@@ -1,5 +1,3 @@
-import datetime
-
 import persistence
 import points
 
@@ -17,17 +15,11 @@ def deposit(accountid, amount, currency):
     balances = db[accountid]["fiat"]["balances"]
     balances[currency] = balances.get(currency, 0) + amount
 
-    transactions = db[accountid]["fiat"]["transactions"]
-    transactions.append(
-        {
-            "id": len(transactions) + 1,
-            "type": "deposit",
-            "amount": amount,
-            "currency": currency,
-            "date": datetime.datetime.now().strftime("%Y-%m-%d"),
-        }
+    persistence.record_transaction(
+        db[accountid]["fiat"]["transactions"], "deposit", amount, "currency", currency
     )
 
-    points.reward_points(accountid, amount)
+    if currency == "PKR":
+        points.reward_points(accountid, amount, db=db)
     persistence.save_db(db)
     return True

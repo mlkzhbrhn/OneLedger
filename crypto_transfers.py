@@ -1,5 +1,3 @@
-import datetime
-
 import persistence
 
 
@@ -45,29 +43,11 @@ def send_crypto(sender, receiver, asset, amount, gas_fee=0.01):
     # Add the amount to receiver's balance
     receiver_assets[asset] = receiver_assets.get(asset, 0) + amount
 
-    # fetch transaction history for both sender and receiver
-    sender_txs = sender_wallet["transactions"]
-    receiver_txs = receiver_wallet["transactions"]
-
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
-
-    sender_txs.append(
-        {
-            "id": len(sender_txs) + 1,
-            "type": "transfer_out",
-            "amount": amount,
-            "asset": asset,
-            "date": today,
-        }
+    persistence.record_transaction(
+        sender_wallet["transactions"], "transfer_out", amount, "asset", asset
     )
-    receiver_txs.append(
-        {
-            "id": len(receiver_txs) + 1,
-            "type": "transfer_in",
-            "amount": amount,
-            "asset": asset,
-            "date": today,
-        }
+    persistence.record_transaction(
+        receiver_wallet["transactions"], "transfer_in", amount, "asset", asset
     )
 
     persistence.save_db(db)

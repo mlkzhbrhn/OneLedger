@@ -1,6 +1,4 @@
 # staking feature for crypto wallets
-import datetime
-
 import persistence
 
 
@@ -27,15 +25,9 @@ def stake_crypto(userid, cryptocurrency, amount):
     user["wallet"]["assets"][cryptocurrency] -= amount
     user["wallet"]["staked_assets"][cryptocurrency] = current_staked + amount
 
-    # record transaction
-    transaction = {
-        "id": len(user["wallet"]["transactions"]) + 1,
-        "type": "stake",
-        "amount": amount,
-        "asset": cryptocurrency,
-        "date": datetime.datetime.now().strftime("%Y-%m-%d"),
-    }
-    user["wallet"]["transactions"].append(transaction)
+    persistence.record_transaction(
+        user["wallet"]["transactions"], "stake", amount, "asset", cryptocurrency
+    )
 
     persistence.save_db(db)
     return True

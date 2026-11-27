@@ -1,5 +1,3 @@
-import datetime
-
 import persistence
 import points
 
@@ -25,28 +23,22 @@ def transfer_funds(senderid, recipientid, amount, currency):
     sender_balances[currency] -= amount
     recipient_balances[currency] = recipient_balances.get(currency, 0) + amount
 
-    sender_txs = db[senderid]["fiat"]["transactions"]
-    sender_txs.append(
-        {
-            "id": len(sender_txs) + 1,
-            "type": "transfer_out",
-            "amount": amount,
-            "currency": currency,
-            "date": datetime.datetime.now().strftime("%Y-%m-%d"),
-        }
+    persistence.record_transaction(
+        db[senderid]["fiat"]["transactions"],
+        "transfer_out",
+        amount,
+        "currency",
+        currency,
+    )
+    persistence.record_transaction(
+        db[recipientid]["fiat"]["transactions"],
+        "transfer_in",
+        amount,
+        "currency",
+        currency,
     )
 
-    recipient_txs = db[recipientid]["fiat"]["transactions"]
-    recipient_txs.append(
-        {
-            "id": len(recipient_txs) + 1,
-            "type": "transfer_in",
-            "amount": amount,
-            "currency": currency,
-            "date": datetime.datetime.now().strftime("%Y-%m-%d"),
-        }
-    )
-
-    points.reward_points(senderid, amount)
+    if currency == "PKR":
+        points.reward_points(senderid, amount, db=db)
     persistence.save_db(db)
     return True
