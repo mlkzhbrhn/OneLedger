@@ -1,9 +1,73 @@
 import flet as ft
 
 import persistence
+import points
 import savings
 import staking
 from ui_helpers import asset_card, go_back, screen_loader
+
+
+def redeem_points_screen(page, username):
+    db = persistence.load_db()
+    user_points = db[username].get("points", 0)
+    points_field = ft.TextField(label="Points", width=150)
+    status_message = ft.Text("", color=ft.Colors.RED)
+
+    def handle_redeem():
+        try:
+            amount = int(points_field.value)
+        except (TypeError, ValueError):
+            status_message.value = "Please enter a valid whole number of points"
+            return
+
+        if amount < points.MIN_REDEEM_POINTS:
+            status_message.value = (
+                f"Minimum redemption is {points.MIN_REDEEM_POINTS} points"
+            )
+            return
+
+        result = points.redeem_points(username, amount)
+        if not result:
+            status_message.value = "Redemption failed. Check your points balance."
+        else:
+            go_back(page, username, content=earn_screen)
+
+    return ft.Container(
+        ft.Column(
+            [
+                ft.Text(
+                    f"Available: {user_points} points (1 point = {points.PKR_PER_POINT} PKR)",
+                    weight=ft.FontWeight.BOLD,
+                ),
+                ft.Row(
+                    [ft.Text("Points", width=70), points_field],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Text(
+                    f"Minimum {points.MIN_REDEEM_POINTS} points to redeem to PKR",
+                    size=12,
+                    color=ft.Colors.GREY,
+                ),
+                ft.Row([status_message], alignment=ft.MainAxisAlignment.CENTER),
+                ft.Row(
+                    [
+                        ft.Button("Redeem", on_click=handle_redeem),
+                        ft.Button(
+                            "Cancel",
+                            on_click=lambda: go_back(
+                                page, username, content=earn_screen
+                            ),
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            expand=True,
+        ),
+        expand=True,
+    )
 
 
 def staking_action_screen(page, username, mode="unstake"):
@@ -169,6 +233,7 @@ def earn_screen(page, username):
 
     pkr_savings = fiat_savings.get("PKR", 0)
     usd_savings = fiat_savings.get("USD", 0)
+    user_points = user.get("points", 0)
 
     return ft.Container(
         content=ft.Column(
@@ -294,6 +359,33 @@ def earn_screen(page, username):
                         ),
                     ],
                     scroll=ft.ScrollMode.AUTO,
+                ),
+                ft.Divider(),
+                ft.Row(
+                    [
+                        ft.Column(
+                            [
+                                ft.Text(
+                                    "Reward Points",
+                                    size=16,
+                                    weight=ft.FontWeight.BOLD,
+                                ),
+                                ft.Text(
+                                    f"{user_points} pts (= {user_points * points.PKR_PER_POINT} PKR)",
+                                    size=14,
+                                ),
+                            ],
+                            spacing=4,
+                        ),
+                        ft.Button(
+                            "Redeem",
+                            on_click=lambda: screen_loader(
+                                page, redeem_points_screen, username
+                            ),
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
             ],
             scroll=ft.ScrollMode.AUTO,
