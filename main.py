@@ -2,7 +2,9 @@ import flet as ft
 
 import auth
 from ui_crypto_view import crypto_screen
+from ui_earn_view import earn_screen
 from ui_fiat_view import dashboard
+from ui_loans_view import loans_screen
 
 
 def authentication(page):
@@ -94,6 +96,8 @@ def app_shell(page, username, content=dashboard):
             [
                 ft.Button("Dashboard", on_click=lambda: switch_view(dashboard)),
                 ft.Button("Crypto", on_click=lambda: switch_view(crypto_screen)),
+                ft.Button("Loans", on_click=lambda: switch_view(loans_screen)),
+                ft.Button("Earn", on_click=lambda: switch_view(earn_screen)),
             ],
             spacing=10,
         ),
