@@ -16,17 +16,49 @@ def stake_crypto(userid, cryptocurrency, amount):
     user = db.get(userid)
     if not user or amount <= 0:
         return False
-    if user["wallet"]["assets"].get(cryptocurrency, 0) < amount:
+
+    assets = user["wallet"]["assets"]
+    staked = user["wallet"]["staked_assets"]
+
+    source = assets
+    destination = staked
+    tx_type = "stake"
+
+    if source.get(cryptocurrency, 0) < amount:
         return False
 
-    current_staked = user["wallet"]["staked_assets"].get(cryptocurrency, 0)
-
-    # update balances
-    user["wallet"]["assets"][cryptocurrency] -= amount
-    user["wallet"]["staked_assets"][cryptocurrency] = current_staked + amount
+    source[cryptocurrency] -= amount
+    destination[cryptocurrency] = destination.get(cryptocurrency, 0) + amount
 
     persistence.record_transaction(
-        user["wallet"]["transactions"], "stake", amount, "asset", cryptocurrency
+        user["wallet"]["transactions"], tx_type, amount, "asset", cryptocurrency
+    )
+
+    persistence.save_db(db)
+    return True
+
+
+def unstake_crypto(userid, cryptocurrency, amount):
+    db = persistence.load_db()
+    user = db.get(userid)
+    if not user or amount <= 0:
+        return False
+
+    assets = user["wallet"]["assets"]
+    staked = user["wallet"]["staked_assets"]
+
+    source = staked
+    destination = assets
+    tx_type = "unstake"
+
+    if source.get(cryptocurrency, 0) < amount:
+        return False
+
+    source[cryptocurrency] -= amount
+    destination[cryptocurrency] = destination.get(cryptocurrency, 0) + amount
+
+    persistence.record_transaction(
+        user["wallet"]["transactions"], tx_type, amount, "asset", cryptocurrency
     )
 
     persistence.save_db(db)
