@@ -217,8 +217,17 @@ def deposit_screen(page, username):
 
 
 def convert_screen(page, username):
+    direction_field = ft.Dropdown(
+        label="Direction",
+        value="fiat_to_crypto",
+        options=[
+            ft.dropdown.Option("fiat_to_crypto", "Fiat -> Crypto"),
+            ft.dropdown.Option("crypto_to_fiat", "Crypto -> Fiat"),
+        ],
+        width=150,
+    )
     fiat_currency_field = ft.Dropdown(
-        label="From (Fiat)",
+        label="Fiat",
         options=[
             ft.dropdown.Option("PKR"),
             ft.dropdown.Option("USD"),
@@ -226,18 +235,20 @@ def convert_screen(page, username):
         width=150,
     )
     crypto_currency_field = ft.Dropdown(
-        label="To (Crypto)",
+        label="Crypto",
         options=[
             ft.dropdown.Option("BTC"),
             ft.dropdown.Option("ETH"),
+            ft.dropdown.Option("SOL"),
         ],
         width=150,
     )
-    amount_field = ft.TextField(label="Fiat Amount", width=150)
+    amount_field = ft.TextField(label="Amount", width=150)
     status_message = ft.Text("", color=ft.Colors.RED)
     loader = ft.ProgressRing(visible=False, width=50, height=50)
 
     async def handle_convert():
+        direction = direction_field.value
         fiat_currency = fiat_currency_field.value
         crypto_currency = crypto_currency_field.value
 
@@ -262,13 +273,22 @@ def convert_screen(page, username):
         status_message.value = "Converting..."
         page.update()
 
-        result = await asyncio.to_thread(
-            conversion.convert_fiat_to_crypto,
-            username,
-            amount,
-            fiat_currency,
-            crypto_currency,
-        )
+        if direction == "crypto_to_fiat":
+            result = await asyncio.to_thread(
+                conversion.convert_crypto_to_fiat,
+                username,
+                amount,
+                crypto_currency,
+                fiat_currency,
+            )
+        else:
+            result = await asyncio.to_thread(
+                conversion.convert_fiat_to_crypto,
+                username,
+                amount,
+                fiat_currency,
+                crypto_currency,
+            )
 
         loader.visible = False
 
@@ -281,11 +301,15 @@ def convert_screen(page, username):
         ft.Column(
             [
                 ft.Row(
-                    [ft.Text("From", width=70), fiat_currency_field],
+                    [ft.Text("Mode", width=70), direction_field],
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
                 ft.Row(
-                    [ft.Text("To", width=70), crypto_currency_field],
+                    [ft.Text("Fiat", width=70), fiat_currency_field],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(
+                    [ft.Text("Crypto", width=70), crypto_currency_field],
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
                 ft.Row(
